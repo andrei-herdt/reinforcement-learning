@@ -1,0 +1,6 @@
+Sun Sep  3 18:55:58 2017
+ERROR: Could not read activation key
+
+Sun Sep  3 19:01:15 2017
+ERROR: Could not read activation key
+
