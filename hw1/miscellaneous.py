@@ -2,12 +2,9 @@ import tensorflow as tf
 import gym
 
 
-env = gym.make(envname)
-max_steps = env.spec.timestep_limit
-
-
 # Obtain data through simulation with OpenAI
-def rollout():
+def rollout(env, policy_fun, render):
+    max_steps = env.spec.timestep_limit
 
     observations = []
     actions = []
@@ -17,7 +14,7 @@ def rollout():
     steps = 0
     done = False
     while not done:
-        action = policy_fn(obs[None,:])
+        action = policy_fun(obs[None,:])
         observations.append(obs.reshape(1,11))
 
         actions.append(action)
@@ -28,7 +25,6 @@ def rollout():
             env.render()
         if steps >= max_steps:
             break
-    returns.append(totalr)
 
     return observations, actions
 
