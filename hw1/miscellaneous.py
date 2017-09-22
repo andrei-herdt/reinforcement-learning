@@ -9,6 +9,8 @@ def rollout(env, policy_fun, render):
 
     observations = []
     actions = []
+    total_rewards = []
+    steps_numbers = []
     obs = env.reset()
     one = False
     totalr = 0.
@@ -27,7 +29,7 @@ def rollout(env, policy_fun, render):
         if steps >= max_steps:
             break
 
-    return observations, actions
+    return observations, actions, totalr, steps
 
 
 def neural_network(input, dimensions):
