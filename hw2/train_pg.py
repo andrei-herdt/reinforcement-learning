@@ -19,7 +19,7 @@ def build_mlp(
         n_layers=2,
         size=64,
         activation=tf.tanh,
-        output_activation=None
+        output_activation=tf.identity
         ):
     #========================================================================================#
     #                           ----------SECTION 3----------
@@ -33,11 +33,11 @@ def build_mlp(
     # Hint: use tf.layers.dense
     #========================================================================================#
         with tf.variable_scope(scope):
-            layer = tf.layers.dense(inputs=input_placeholder, units=size, activation=tf.nn.relu)
+            layer = tf.layers.dense(inputs=input_placeholder, units=size, activation=activation)
             for layer_num in range(n_layers):
-                layer = tf.layers.dense(inputs=layer, units=size, activation=tf.nn.relu)
-            output_layer = tf.layers.dense(inputs=layer, units=size, activation=tf.nn.relu)
-        pass
+                layer = tf.layers.dense(inputs=layer, units=size, activation=activation)
+            output_layer = tf.layers.dense(inputs=layer, units=output_size, activation=output_activation)
+        return output_layer
 
 def pathlength(path):
     return len(path["reward"])
@@ -169,9 +169,12 @@ def train_PG(exp_name='',
 
     if discrete:
         # YOUR_CODE_HERE
-        sy_logits_na = tf.log(build_mlp(sy_ob_no, ac_dim, 'discrete'))
+        sy_logits_na = tf.log(build_mlp(sy_ob_no, ac_dim, 'discrete', n_layers=n_layers, size=size))
         sy_sampled_ac = tf.multinomial(sy_logits_na, 1)
-        sy_logprob_n = tf.matmul(sy_ac_na, sy_logits_na, transpose_b=True)
+
+        action_mask = tf.one_hot(sy_ac_na, ac_dim) # Converts to float32 by default
+                                                    # Could this be avoided
+        sy_logprob_n = tf.multiply(action_mask, sy_logits_na)
 
     else:
         # YOUR_CODE_HERE
