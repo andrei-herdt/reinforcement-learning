@@ -169,13 +169,12 @@ def train_PG(exp_name='',
 
     if discrete:
         # YOUR_CODE_HERE
-        sy_logits_na = tf.log(build_mlp(sy_ob_no, ac_dim, 'discrete', n_layers=n_layers, size=size))
+        sy_logits_na = tf.nn.log_softmax(build_mlp(sy_ob_no, ac_dim, 'discrete', n_layers=n_layers, size=size))
         sy_sampled_ac = tf.multinomial(sy_logits_na, 1)
 
-        action_mask = tf.one_hot(sy_ac_na, ac_dim) # Converts to float32 by default
-                                                    # Could this be avoided
-        sy_logprob_n = tf.multiply(action_mask, sy_logits_na)
-
+        action_mask = tf.one_hot(sy_ac_na, ac_dim)
+        log_prob_of_action = tf.multiply(action_mask, sy_logits_na)
+        sy_logprob_n = tf.reduce_sum(log_prob_of_action, 1)
     else:
         # YOUR_CODE_HERE
         sy_mean = build_mlp(sy_ob_no, ac_dim, 'continuous')
@@ -247,7 +246,7 @@ def train_PG(exp_name='',
                     env.render()
                     time.sleep(0.05)
                 obs.append(ob)
-                ac = sess.run(sy_sampled_ac, feed_dict={sy_ob_no : ob[None]})
+                ac = sess.run(sy_sampled_ac[0], feed_dict={sy_ob_no : ob[None]})
                 ac = ac[0]
                 acs.append(ac)
                 ob, rew, done, _ = env.step(ac)
@@ -323,19 +322,21 @@ def train_PG(exp_name='',
         #====================================================================================#
 
         # YOUR_CODE_HERE
-        q_n = []
-        if reward_to_go:
-            for path in paths:
-                rewards = path["rewards"]
-                # assume gamma == 1
-                n_steps = len(rewards)
-                q_tau = np.array([np.sum(rewards[i:]) for i in range(n_steps)])
-        else:
-            for path in paths:
-                rewards = path["rewards"]
-                # assume gamma == 1
-                q_tau = np.array([np.sum(rewards)])
-        q_n = np.array(q_n)
+        q_n = np.array([])
+        for path in paths:
+            rewards = path["reward"]
+            discounts = np.logspace(0, len(rewards), num=len(rewards), base=gamma, endpoint=False)
+            if reward_to_go:
+                q_n_for_path = []
+                for t in range(len(rewards)):
+                    q_t = np.sum(np.multiply(rewards[t:], discounts[:(len(rewards)-t)]))
+                    q_n_for_path.append(q_t)
+                q_n_for_path = np.array(q_n_for_path)
+            else:
+                q_t0 = np.sum(np.multiply(rewards, discounts))
+                q_n_for_path = np.repeat(q_t0, len(rewards))
+
+            q_n = np.append(q_n, q_n_for_path)
 
         #====================================================================================#
         #                           ----------SECTION 5----------
@@ -365,7 +366,8 @@ def train_PG(exp_name='',
             # On the next line, implement a trick which is known empirically to reduce variance
             # in policy gradient methods: normalize adv_n to have mean zero and std=1.
             # YOUR_CODE_HERE
-            pass
+            adv_n = (adv_n - np.mean(adv_n)) / np.std(adv_n)
+
 
 
         #====================================================================================#
@@ -398,7 +400,10 @@ def train_PG(exp_name='',
         # and after an update, and then log them below.
 
         # YOUR_CODE_HERE
-
+        loss_pre = sess.run(loss, feed_dict={sy_ob_no: ob_no, sy_ac_na: ac_na, sy_adv_n: adv_n})
+        sess.run(update_op, feed_dict={sy_ob_no: ob_no, sy_ac_na: ac_na, sy_adv_n: adv_n})
+        loss_post = sess.run(loss, feed_dict={sy_ob_no: ob_no, sy_ac_na: ac_na, sy_adv_n: adv_n})
+        print("update")
 
         # Log diagnostics
         returns = [path["reward"].sum() for path in paths]
