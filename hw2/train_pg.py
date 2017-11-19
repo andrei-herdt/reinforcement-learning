@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import gym
 import logz
-import scipy.signal
+#import scipy.signal
 import os
 import time
 import inspect
