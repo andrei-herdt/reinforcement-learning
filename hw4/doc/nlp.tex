@@ -1,0 +1,25 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{array}
+\begin{document}
+
+\begin{align}
+    a = \text{arg min} \sum_{t'=t}^{t+H-1}c(\hat s_{t'},a_{t'})\\
+    c = \|a\|^2_2+\|\dot x\|^2_2
+\end{align}
+\text{subject to:}
+\begin{align}
+    s_{t+1} = s_t + f_\theta(s_t, a_t)
+\end{align}
+We discretize by linearizing:
+\begin{align}
+    \delta s_{t+1} = s_t + f_\theta(s_t, a_t)
+\end{align}
+We solve via SQP, i.e. we solve a sequence of the following QPs:
+\begin{align}
+    \text{min} \sum_{i=0}^{N-1}
+    \|c_i + J_i \begin{bmatrix}\Delta x\\ \Delta a\end{bmatrix}\|\\
+    \delta  = \|a\|^2_2+\|\dot x\|^2_2
+\end{align}
+where $J_i$ are the Jacobians of the residual function $c$ at $(s_i, a_i)$.
+\end{document}
