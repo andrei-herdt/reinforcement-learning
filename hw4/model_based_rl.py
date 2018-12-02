@@ -154,12 +154,11 @@ class ModelBasedRL(object):
         logger.info('All plots saved to folder')
         logger.dump_tabular(print_func=logger.info)
 
-    def run_mpc(self):
-
     def run_q2(self):
         """
         Train the model-based policy on a random dataset, and evaluate the performance of the resulting policy
         """
+
         logger.info('Random policy')
         self._log(self._random_dataset)
 

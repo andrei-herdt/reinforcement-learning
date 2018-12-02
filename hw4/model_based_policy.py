@@ -140,9 +140,19 @@ class ModelBasedPolicy(object):
                 (iii) Use tf.random_uniform(...) to generate the random action sequences
 
         """
-        ### PROBLEM 2
-        ### YOUR CODE HERE
-        raise NotImplementedError
+        # (a)
+        # (b) Randomly sample uniformly self._num_random_action_selection number of action sequences,
+        #     each of length self._horizon
+        min_cost = 10000000
+        cost_ph = tf.placeholder( shape=[None, 1], dtype=tf.float32, name='cost')
+        cost_rollout = 0
+        for act_seq in range(self._num_random_action_selection):
+            for num_act in range(self._horizon):
+                action = tf.random.uniform([1, self._action_dim])
+                next_state_pred, next_state_pred_grad = self._dynamics_func(state_ph, action_ph, reuse=False)
+                cost_ph = tf.add(self._cost_fn(state_ph, action_ph, next_state_pred), cost_ph)
+                min_cost
+
 
         return best_action
 
@@ -160,7 +170,7 @@ class ModelBasedPolicy(object):
 
         ### PROBLEM 2
         ### YOUR CODE HERE
-        best_action = None
+        best_action = self._setup_action_selection(state_ph)
 
         sess.run(tf.global_variables_initializer())
         return sess, state_ph, action_ph, next_state_ph, \
