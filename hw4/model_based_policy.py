@@ -146,18 +146,20 @@ class ModelBasedPolicy(object):
         min_cost = 10000000
         cost_ph = tf.placeholder( shape=[None, 1], dtype=tf.float32, name='cost')
         cost_rollout = 0
-        actions = []
-        costs = []
+        cost_actions = []
         for act_seq_num in range(self._num_random_action_selection):
-            tf.random.uniform([self._horizon, self._action_dim])
-            for num_act in range(self._horizon):
+            actions_ph = tf.random_uniform([self._horizon, self._action_dim])
+            for action_ph in actions_ph:
                 # (c) Starting from the input state, unroll each action sequence using your neural network
                 #     dynamics model
-                next_state_pred, next_state_pred_grad = self._dynamics_func(state_ph, action_ph, reuse=False)
+                next_state_pred, next_state_pred_grad = self._dynamics_func(state_ph, actions_ph, reuse=False)
                 # (d) While unrolling the action sequences, keep track of the cost of each action sequence
                 #     using self._cost_fn
                 cost_ph = tf.add(self._cost_fn(state_ph, action_ph, next_state_pred), cost_ph)
 
+            cost_actions.append((actions, cost_ph))
+        # (e) Find the action sequence with the lowest cost, and return the first action in that sequence
+        best_action = min(cost_actions, key = lambda t: t[1])
 
         return best_action
 
