@@ -37,8 +37,8 @@ mbrl = ModelBasedRL(env=env,
                     nn_layers=args.nn_layers)
 
 run_func = {
-    'q1': mbrl.run_q1#,
-#     # 'q2': mbrl.run_q2,
+    'q1': mbrl.run_q1,
+    'q2': mbrl.run_q2,
 #     # 'q3': mbrl.run_q3
 }[args.question]
 run_func()
