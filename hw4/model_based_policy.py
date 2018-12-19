@@ -148,7 +148,7 @@ class ModelBasedPolicy(object):
         seq_costs = tf.tile([0.0], [ self._num_random_action_selection ])
         seq_state = tf.tile(state_ph, [ self._num_random_action_selection ,1])
         for t in range(self._horizon):
-            next_state_pred, next_state_pred_grad = self._dynamics_func(state_ph, actions[t,:,:], reuse=tf.AUTO_REUSE)
+            next_state_pred, next_state_pred_grad = self._dynamics_func(seq_state, actions[t,:,:], reuse=tf.AUTO_REUSE)
             # (d) While unrolling the action sequences, keep track of the cost of each action sequence
             #     using self._cost_fn
             seq_costs += self._cost_fn(seq_state, actions[t,:,:], next_state_pred)
