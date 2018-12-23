@@ -158,19 +158,19 @@ class ModelBasedRL(object):
         """
         Train the model-based policy on a random dataset, and evaluate the performance of the resulting policy
         """
-
         logger.info('Random policy')
-        # self._log(self._random_dataset)
+        self._log(self._random_dataset)
 
         logger.info('Training policy....')
-        self._train_policy(self._random_dataset)
         ### PROBLEM 2
         ### YOUR CODE HERE
+        raise NotImplementedError
+
         logger.info('Evaluating policy...')
-        eval_dataset = self._gather_rollouts(self._policy,
-                                             self._num_onpolicy_rollouts)
         ### PROBLEM 2
         ### YOUR CODE HERE
+        raise NotImplementedError
+
         logger.info('Trained policy')
         self._log(eval_dataset)
 
@@ -193,16 +193,17 @@ class ModelBasedRL(object):
             ### PROBLEM 3
             ### YOUR CODE HERE
             logger.info('Training policy...')
-            raise NotImplementedError
+            self._train_policy(dataset)
 
             ### PROBLEM 3
             ### YOUR CODE HERE
             logger.info('Gathering rollouts...')
-            raise NotImplementedError
+            new_dataset = self._gather_rollouts(self._policy,
+                                                self._num_onpolicy_rollouts)
 
             ### PROBLEM 3
             ### YOUR CODE HERE
             logger.info('Appending dataset...')
-            raise NotImplementedError
+            dataset.append(new_dataset)
 
             self._log(new_dataset)

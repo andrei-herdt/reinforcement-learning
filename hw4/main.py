@@ -39,6 +39,6 @@ mbrl = ModelBasedRL(env=env,
 run_func = {
     'q1': mbrl.run_q1,
     'q2': mbrl.run_q2,
-#     # 'q3': mbrl.run_q3
+    'q3': mbrl.run_q3
 }[args.question]
 run_func()
